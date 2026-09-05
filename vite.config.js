@@ -26,10 +26,13 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
-    // GitHub Pages публикует проект в подкаталоге /<repo>/ — путь приходит
-    // из workflow в VITE_BASE. Для хостингов с корневым доменом (Netlify,
-    // Vercel, Cloudflare) достаточно относительных путей.
-    base: process.env.VITE_BASE || './',
+    // Базовый путь обязан быть АБСОЛЮТНЫМ: у SPA маршруты имеют разную
+    // глубину (/building/building-1), и относительный './assets/...' из
+    // index.html превратился бы в '/building/assets/...' → 404 и белый экран.
+    //   • корневой домен (Plesk, Netlify, Vercel, Cloudflare) → '/'
+    //   • подкаталог (GitHub Pages) → VITE_BASE, его задаёт workflow
+    //   • single-file сборка → пути не нужны, всё инлайнится
+    base: process.env.VITE_BASE || (singleFile ? './' : '/'),
     define: {
       'import.meta.env.VITE_HASH_ROUTER': JSON.stringify(singleFile ? '1' : '0'),
     },

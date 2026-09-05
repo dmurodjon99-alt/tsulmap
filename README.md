@@ -170,6 +170,26 @@ npm run build:artifact && node scripts/make-artifact-page.mjs
 Страница приватная: ссылка работает только у владельца, пока он не откроет
 доступ через меню share.
 
+### Plesk (eskiz.uz и любой shared-хостинг)
+
+```bash
+npm run build
+```
+
+Содержимое `dist/` кладётся в корень сайта (`httpdocs/`) — вместе со скрытым
+`.htaccess`, он собирается автоматически из `public/.htaccess` и включает
+SPA-fallback, кеширование и отдачу видео по диапазонам байт.
+
+Порядок в панели: **File Manager → httpdocs** → удалить дефолтные
+`index.html`/`index.php` → **Upload** архива → **Extract Files**.
+Архив собирается командой из раздела «Сборка пакета» ниже.
+
+Если сайт отдаётся только nginx (без Apache), `.htaccess` не сработает —
+вставьте директивы из `deploy/plesk-nginx.conf` в **Apache & nginx Settings →
+Additional nginx directives**.
+
+---
+
 ### Публичный адрес: любой бесплатный статик-хостинг
 
 Обычная сборка `npm run build` → каталог `dist/`. Конфиги уже в репозитории:
@@ -180,6 +200,7 @@ npm run build:artifact && node scripts/make-artifact-page.mjs
 | **Vercel** | `vercel --prod` | `vercel.json` |
 | **Cloudflare Pages** | build `npm run build`, output `dist` | те же настройки, отдельный файл не нужен |
 | **GitHub Pages** | запушить в `main`, включить Settings → Pages → Source: GitHub Actions | `.github/workflows/deploy-pages.yml` |
+| **Plesk / eskiz.uz** | загрузить `dist/` в `httpdocs` | `public/.htaccess`, `deploy/plesk-nginx.conf` |
 
 Во всех вариантах прописан SPA-fallback на `index.html` — без него прямые
 ссылки вроде `/building/building-1?unit=b1-legal-clinic` отдавали бы 404.
