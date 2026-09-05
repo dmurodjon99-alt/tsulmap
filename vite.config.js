@@ -26,8 +26,10 @@ export default defineConfig(({ mode }) => {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
       },
     },
-    // Относительные пути: сборка работает и из подкаталога (GitHub Pages)
-    base: './',
+    // GitHub Pages публикует проект в подкаталоге /<repo>/ — путь приходит
+    // из workflow в VITE_BASE. Для хостингов с корневым доменом (Netlify,
+    // Vercel, Cloudflare) достаточно относительных путей.
+    base: process.env.VITE_BASE || './',
     define: {
       'import.meta.env.VITE_HASH_ROUTER': JSON.stringify(singleFile ? '1' : '0'),
     },

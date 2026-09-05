@@ -1,4 +1,7 @@
-# Публикация на GitHub Pages. Включите Settings → Pages → Source: GitHub Actions.
+# Публикация на GitHub Pages.
+#
+# Ручных действий в настройках не требуется: шаг configure-pages с
+# `enablement: true` включает Pages сам (для этого у workflow есть pages: write).
 name: Deploy to GitHub Pages
 
 on:
@@ -11,19 +14,42 @@ permissions:
   pages: write
   id-token: write
 
+# Параллельные деплои не нужны: важен только последний коммит
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # Включает Pages, если он ещё не включён, и отдаёт базовый путь сайта
+      # (/tsulmap для project site, пустая строка для user/org site).
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: npm
+
       - run: npm ci
+
+      # Vite должен знать префикс подкаталога, иначе ассеты и маршруты
+      # ищутся в корне домена. Пустой base_path (корневой сайт) → "/".
+      - name: Resolve base path
+        run: echo "VITE_BASE=${{ steps.pages.outputs.base_path }}/" >> "$GITHUB_ENV"
+
       - run: npm run build
+
       # GitHub Pages не умеет SPA-fallback: копия index.html как 404.html
       - run: cp dist/index.html dist/404.html
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
