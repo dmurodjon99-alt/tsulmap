@@ -1,0 +1,95 @@
+{
+  "_comment": [
+    "Канонический JSON-формат одной записи подразделения.",
+    "Файлы src/data/buildings/*.js собирают ровно такую структуру через хелперы",
+    "L() / P() / S() — это тот же формат, только без повторения ключей ru/en/uz.",
+    "Если контент будет отдавать CMS или API, этот JSON можно подставить напрямую:",
+    "компоненты не изменятся, т.к. читают поля через pick()/useL10n()."
+  ],
+
+  "id": "b2-moot-court",
+  "buildingId": "b2",
+  "category": "facility",
+  "floor": 2,
+  "rooms": ["204"],
+  "keywords": ["moot court", "мут корт", "судебный зал", "sud zali"],
+
+  "name": {
+    "uz": "Moot Court — o‘quv sud zali",
+    "ru": "Учебный зал судебных заседаний (Moot Court)",
+    "en": "Moot Court Room"
+  },
+
+  "summary": {
+    "uz": "Haqiqiy sud jarayoni simulyatsiyasi",
+    "ru": "Симуляция реального судебного процесса: истец, ответчик, прокурор, защитник",
+    "en": "Simulation of a real trial: plaintiff, defendant, prosecutor, defence counsel"
+  },
+
+  "address": {
+    "ru": "г. Ташкент, ул. Сайилгох, 35, ТГЮУ, учебное здание №2, второй этаж, №204",
+    "en": "Tashkent city, Sayilgokh street, 35, TSUL, academic building No. 2, second floor, No. 204"
+  },
+
+  "motto": {
+    "ru": "Путь истины",
+    "en": "The Path of Truth"
+  },
+
+  "hours": {
+    "ru": "С понедельника по пятницу с 10:00 до 15:00",
+    "en": "Monday through Friday from 10:00 to 15:00",
+    "uz": "Dushanbadan jumagacha 10:00–15:00"
+  },
+
+  "sections": [
+    {
+      "key": "about",
+      "body": {
+        "ru": "Учебный зал судебных заседаний (Moot Court) — это симуляция реального суда…",
+        "en": "The Moot Court Room is a simulation of a real court…"
+      }
+    },
+    {
+      "key": "tasks",
+      "items": {
+        "ru": ["первый пункт списка;", "второй пункт списка."],
+        "en": ["first list item;", "second list item."]
+      }
+    }
+  ],
+
+  "staff": [
+    {
+      "name": {
+        "ru": "Джураев Ихтиёр Бахтиярович",
+        "en": "Dzhuraev Ikhtiyor Bakhtiyarovich",
+        "uz": "Jo‘rayev Ixtiyor Baxtiyorovich"
+      },
+      "role": {
+        "ru": "заведующий кафедрой, доктор юридических наук (DSc)",
+        "en": "Head of the Department, Doctor of Law (DSc)"
+      }
+    }
+  ],
+
+  "consultations": [
+    {
+      "person": { "ru": "Беков Ихтиёр", "en": "Bekov Ikhtiyor" },
+      "when": { "ru": "понедельник 9:00–12:00", "en": "Monday 9:00–12:00" },
+      "room": "110"
+    }
+  ],
+
+  "audience": {
+    "ru": "Могут участвовать абсолютно все студенты как ТГЮУ, так и других университетов…",
+    "en": "Absolutely all students, both from TSUL and other universities, can participate…"
+  },
+
+  "contacts": {
+    "phone": ["233-66-36", "1114 (внутр.)"],
+    "email": ["lawclinic@tsul.uz"],
+    "telegram": ["@TDYU_Yuridik_klinika_bot"],
+    "links": []
+  }
+}

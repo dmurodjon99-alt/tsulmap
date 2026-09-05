@@ -1,0 +1,11 @@
+# Netlify (бесплатный тариф). Деплой: netlify deploy --prod  (или через веб-интерфейс)
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# SPA: любой путь отдаём index.html, иначе прямые ссылки вида
+# /building/building-1 вернут 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

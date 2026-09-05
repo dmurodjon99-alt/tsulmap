@@ -1,0 +1,227 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Фоновое изображение кампуса. Положите файл в /public/campus.jpg —
+       он подхватится автоматически; до этого работает градиентный фолбэк. */
+    --campus-bg: url('/campus.jpg');
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-tsul-950 font-sans text-white antialiased;
+    min-height: 100dvh;
+    /* Нужно для full-bleed видео-заставки (w-screen внутри контейнера).
+       Именно `clip`, а не `hidden`: `hidden` превратил бы <body> в скролл-
+       контейнер и сломал `position: sticky` у шапки. */
+    overflow-x: clip;
+  }
+
+  /* Единый фон-подложка: фото кампуса + синий градиент-затемнение,
+     поверх которого «парят» стеклянные поверхности. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -2;
+    background-image: linear-gradient(
+        180deg,
+        rgba(4, 18, 43, 0.82) 0%,
+        rgba(7, 27, 58, 0.88) 45%,
+        rgba(4, 18, 43, 0.96) 100%
+      ),
+      var(--campus-bg), linear-gradient(135deg, #0b2a5b 0%, #04122b 55%, #123c7a 100%);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+  }
+
+  /* Мягкие «световые пятна» — придают глубину матовому стеклу. */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(60rem 40rem at 12% -5%, rgba(76, 141, 224, 0.28), transparent 60%),
+      radial-gradient(45rem 32rem at 95% 8%, rgba(201, 162, 39, 0.16), transparent 60%);
+  }
+
+  ::selection {
+    @apply bg-gold-500/40 text-white;
+  }
+
+  /* Кастомный скроллбар в тон интерфейсу */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply rounded-full bg-white/15;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-white/25;
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-gold-400 ring-offset-2 ring-offset-tsul-950;
+  }
+}
+
+@layer components {
+  /* ============================================================
+     GLASSMORPHISM — базовые классы.
+     Все поверхности интерфейса строятся из этих трёх уровней.
+     ============================================================ */
+
+  /* Уровень 1: карточки, панели, поля поиска */
+  .glass {
+    @apply border border-white/15 bg-white/10 shadow-glass backdrop-blur-glass;
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.14) 0%,
+      rgba(255, 255, 255, 0.06) 100%
+    );
+  }
+
+  /* Уровень 2: модальные окна, drawer, выпадающие списки (плотнее и темнее) */
+  .glass-panel {
+    @apply border border-white/20 bg-tsul-900/70 shadow-glass-lg backdrop-blur-glass-lg;
+    background-image: linear-gradient(
+      160deg,
+      rgba(255, 255, 255, 0.16) 0%,
+      rgba(255, 255, 255, 0.04) 55%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+  }
+
+  /* Поисковая выдача и поле поиска.
+     Отдельный, намеренно менее прозрачный уровень: выдача всплывает поверх
+     видео-заставки и фотофона, где «честное» стекло (10% белого) даёт
+     недостаточный контраст текста. Размытие сохранено — эффект стекла
+     остаётся, но текст читается на любом кадре видео. */
+  .search-field {
+    @apply border border-white/25 bg-tsul-950/60 shadow-glass backdrop-blur-glass;
+  }
+  .search-field:focus-within {
+    @apply border-gold-400/70 bg-tsul-950/75;
+  }
+
+  .search-panel {
+    @apply border border-white/25 bg-tsul-950/95 shadow-glass-lg backdrop-blur-glass-lg;
+  }
+
+  /* Подсветка совпадения в результатах поиска */
+  .search-mark {
+    @apply rounded-[3px] bg-gold-400/25 px-0.5 text-gold-100;
+  }
+
+  /* Уровень 3: чипы, бейджи, мелкие управляющие элементы */
+  .glass-chip {
+    @apply border border-white/15 bg-white/10 backdrop-blur-xs;
+  }
+
+  /* Интерактивная карточка: приподнимается и «ловит свет» при наведении */
+  .glass-interactive {
+    @apply glass transition-all duration-300 ease-out;
+  }
+  .glass-interactive:hover {
+    @apply -translate-y-1 border-white/30 bg-white/[0.16] shadow-glass-lg;
+  }
+
+  /* Тонкий блик по верхней кромке — ключевая деталь «матового стекла» */
+  .glass-highlight {
+    @apply relative overflow-hidden;
+  }
+  .glass-highlight::before {
+    content: '';
+    @apply pointer-events-none absolute inset-x-0 top-0 h-px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0.1),
+      transparent
+    );
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/20
+           bg-tsul-600/80 px-5 py-2.5 text-sm font-semibold text-white shadow-glass
+           backdrop-blur-glass transition hover:bg-tsul-500/90 active:scale-[0.98];
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/15
+           bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur-xs
+           transition hover:border-white/30 hover:bg-white/20 active:scale-[0.98];
+  }
+
+  .label-eyebrow {
+    @apply text-[11px] font-semibold uppercase tracking-[0.18em] text-gold-400;
+  }
+
+  .hairline {
+    @apply border-t border-white/10;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  /* Safe-area для мобильных устройств с «чёлкой» */
+  .pb-safe {
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Keyframes, которые используются через inline-style (маркеры на плане этажа,
+   декоративная схема на главной). Tailwind генерирует @keyframes только для
+   реально встреченных классов `animate-*`, поэтому объявляем их явно.
+   --------------------------------------------------------------------------- */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -1000;
+  }
+}
+
+/* Уважение к prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

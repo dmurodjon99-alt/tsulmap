@@ -1,0 +1,7 @@
+# В репозитории храним LF, в рабочей копии Windows — CRLF
+* text=auto eol=lf
+
+# Бинарные ассеты не трогаем
+*.png binary
+*.mp4 binary
+*.jpg binary
