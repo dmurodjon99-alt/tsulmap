@@ -34,18 +34,23 @@ jobs:
 
       # Необязательная попытка включить Pages автоматически.
       - name: Configure Pages (best effort)
+        id: pages
         uses: actions/configure-pages@v6
         continue-on-error: true
         with:
           enablement: true
 
-      # Базовый путь считаем сами, а не из выхода configure-pages: тот шаг
-      # может не отработать, и тогда сборка молча ушла бы в корень домена.
-      # user/org site (<owner>.github.io) публикуется в корне, остальное —
-      # в подкаталоге /<repo>/. При своём домене замените на "/".
+      # Базовый путь зависит от того, как опубликован сайт:
+      #   project site        → /<repo>/
+      #   user/org site       → /
+      #   свой домен (CNAME)  → /   (сайт лежит в корне домена)
+      # configure-pages знает про все три случая и отдаёт base_path, но шаг
+      # может не отработать (нет прав) — тогда считаем путь из имени репозитория.
       - name: Resolve base path
         run: |
-          if [ "${{ github.event.repository.name }}" = "${{ github.repository_owner }}.github.io" ]; then
+          if [ "${{ steps.pages.outcome }}" = "success" ]; then
+            echo "VITE_BASE=${{ steps.pages.outputs.base_path }}/" >> "$GITHUB_ENV"
+          elif [ "${{ github.event.repository.name }}" = "${{ github.repository_owner }}.github.io" ]; then
             echo "VITE_BASE=/" >> "$GITHUB_ENV"
           else
             echo "VITE_BASE=/${{ github.event.repository.name }}/" >> "$GITHUB_ENV"
