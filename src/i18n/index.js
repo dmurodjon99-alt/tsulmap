@@ -5,6 +5,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 import uz from './locales/uz.json';
 import ru from './locales/ru.json';
 import en from './locales/en.json';
+import { SUPPORTED_LANGUAGES, FALLBACK_CHAIN } from './config.js';
 
 /**
  * АРХИТЕКТУРА МУЛЬТИЯЗЫЧНОСТИ
@@ -25,18 +26,6 @@ import en from './locales/en.json';
  * «перевод готовится» (см. компонент <TranslationNotice/>).
  */
 
-export const SUPPORTED_LANGUAGES = [
-  { code: 'uz', label: 'UZ', name: "O'zbekcha", htmlLang: 'uz' },
-  { code: 'ru', label: 'RU', name: 'Русский', htmlLang: 'ru' },
-  { code: 'en', label: 'EN', name: 'English', htmlLang: 'en' },
-];
-
-export const FALLBACK_CHAIN = {
-  uz: ['ru', 'en'],
-  ru: ['en', 'uz'],
-  en: ['ru', 'uz'],
-  default: ['ru', 'en'],
-};
 
 i18n
   .use(LanguageDetector)
@@ -65,4 +54,5 @@ const syncHtmlLang = (lng) => {
 syncHtmlLang(i18n.resolvedLanguage);
 i18n.on('languageChanged', syncHtmlLang);
 
+export { SUPPORTED_LANGUAGES, FALLBACK_CHAIN };
 export default i18n;

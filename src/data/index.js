@@ -3,6 +3,8 @@ import { building2 } from './buildings/building-2.js';
 import { building3 } from './buildings/building-3.js';
 import { building4 } from './buildings/building-4.js';
 import { searchableText } from '../i18n/localize.js';
+import { UZ_CONTENT } from './translations/uz-content.js';
+import { ROLES_UZ, translateSchedule } from './translations/uz-staff.js';
 
 /**
  * СЛОЙ ДАННЫХ
@@ -24,25 +26,63 @@ const RAW_BUILDINGS = [building1, building2, building3, building4];
  * Для остальных подставляем латинское написание из английской версии:
  * это корректнее, чем показывать кириллицу в узбекской локали.
  */
-const withUzbekNameFallback = (person) => {
-  if (person.name?.uz || !person.name?.en) return person;
-  return { ...person, name: { ...person.name, uz: person.name.en } };
+const withLatinNameFallback = (field) =>
+  field?.uz || !field?.en ? field : { ...field, uz: field.en };
+
+/** Добавляет узбекский вариант, если его ещё нет (официальный текст в приоритете). */
+const withUz = (field, uz) => (!field || !uz || field.uz ? field : { ...field, uz });
+
+/**
+ * Накладывает переводы из src/data/translations на запись подразделения.
+ * Официальные узбекские тексты (здание №3) остаются нетронутыми —
+ * withUz() пишет только в пустые места.
+ */
+const applyUzTranslations = (unit) => {
+  const t = UZ_CONTENT[unit.id];
+
+  const staff = (unit.staff ?? []).map((p) => ({
+    ...p,
+    name: withLatinNameFallback(p.name),
+    role: withUz(p.role, p.role?.ru ? ROLES_UZ[p.role.ru] : null),
+  }));
+
+  const consultations = (unit.consultations ?? []).map((c) => ({
+    ...c,
+    person: withLatinNameFallback(c.person),
+    when: withUz(c.when, c.when?.ru ? translateSchedule(c.when.ru) : null),
+  }));
+
+  return {
+    ...unit,
+    address: withUz(unit.address, t?.address),
+    motto: withUz(unit.motto, t?.motto),
+    audience: withUz(unit.audience, t?.audience),
+    hours: withUz(unit.hours, t?.hours),
+    summary: withUz(unit.summary, t?.summary),
+    sections: (unit.sections ?? []).map((s) => {
+      const uz = t?.sections?.[s.key];
+      if (!uz) return s;
+      return s.body ? { ...s, body: withUz(s.body, uz) } : { ...s, items: withUz(s.items, uz) };
+    }),
+    staff,
+    consultations,
+  };
 };
 
-const normalizeUnit = (unit, building) => ({
-  category: 'service',
-  rooms: [],
-  sections: [],
-  staff: [],
-  consultations: [],
-  keywords: [],
-  ...unit,
-  buildingId: building.id,
-  buildingNumber: building.number,
-  buildingSlug: building.slug,
-  buildingName: building.name,
-  staff: (unit.staff ?? []).map(withUzbekNameFallback),
-});
+const normalizeUnit = (unit, building) =>
+  applyUzTranslations({
+    category: 'service',
+    rooms: [],
+    sections: [],
+    staff: [],
+    consultations: [],
+    keywords: [],
+    ...unit,
+    buildingId: building.id,
+    buildingNumber: building.number,
+    buildingSlug: building.slug,
+    buildingName: building.name,
+  });
 
 export const BUILDINGS = RAW_BUILDINGS.map((b) => ({
   ...b,

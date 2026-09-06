@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { FALLBACK_CHAIN } from './index.js';
+import { FALLBACK_CHAIN } from './config.js';
 
 /**
  * pick() — разрешение локализованного значения из объекта { ru, en, uz }.
