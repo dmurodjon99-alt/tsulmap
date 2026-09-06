@@ -1,6 +1,7 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { viteSingleFile } from 'vite-plugin-singlefile';
+import legacy from '@vitejs/plugin-legacy';
 import { fileURLToPath, URL } from 'node:url';
 
 /**
@@ -24,7 +25,15 @@ export default defineConfig(({ mode }) => {
   const hashRouter = singleFile || process.env.VITE_HASH_ROUTER === '1';
 
   return {
-    plugins: [react(), ...(singleFile ? [viteSingleFile()] : [])],
+    plugins: [
+      react(),
+      // Старые мобильные WebView (Telegram, встроенные браузеры на Android)
+      // не понимают синтаксис ES2020 и падают ещё на разборе бандла — экран
+      // остаётся пустым. legacy собирает вторую версию с транспиляцией и
+      // полифилами, она подключается через nomodule и грузится только там,
+      // где нужна. В single-file режиме не применяется: это один файл.
+      ...(singleFile ? [viteSingleFile()] : [legacy({ targets: ['defaults', 'not IE 11'] })]),
+    ],
     resolve: {
       alias: {
         '@': fileURLToPath(new URL('./src', import.meta.url)),
