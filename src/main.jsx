@@ -10,15 +10,20 @@ import './styles/index.css';
  * Single-file сборка (Claude Artifacts и подобные) такого fallback не имеет,
  * поэтому там используется HashRouter: /#/building/building-1.
  */
-const Router = import.meta.env.VITE_HASH_ROUTER === '1' ? HashRouter : BrowserRouter;
+const isHashRouting = import.meta.env.VITE_HASH_ROUTER === '1';
+const Router = isHashRouting ? HashRouter : BrowserRouter;
 
 /**
- * На GitHub Pages сайт лежит в подкаталоге (/tsulmap/), и без basename путь
- * не совпал бы ни с одним маршрутом — приложение ушло бы редиректом на корень
- * домена. BASE_URL здесь './' (обычный хостинг) или '/tsulmap/' (Pages).
+ * basename нужен только BrowserRouter: на GitHub Pages сайт лежит в
+ * подкаталоге (/tsulmap/), и без префикса путь не совпал бы ни с одним
+ * маршрутом. У HashRouter путь живёт после «#», подкаталог его не касается,
+ * и basename там только сломал бы совпадение.
  */
 const base = import.meta.env.BASE_URL;
-const basename = base.startsWith('/') && base !== '/' ? base.replace(/\/$/, '') : undefined;
+const basename =
+  !isHashRouting && base.startsWith('/') && base !== '/'
+    ? base.replace(/\/$/, '')
+    : undefined;
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

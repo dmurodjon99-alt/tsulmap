@@ -19,6 +19,10 @@ import { fileURLToPath, URL } from 'node:url';
 export default defineConfig(({ mode }) => {
   const singleFile = mode === 'artifact';
 
+  // Hash-роутинг: обязателен там, где нет серверного fallback на index.html
+  // (single-file сборка) и крайне желателен на GitHub Pages — см. main.jsx.
+  const hashRouter = singleFile || process.env.VITE_HASH_ROUTER === '1';
+
   return {
     plugins: [react(), ...(singleFile ? [viteSingleFile()] : [])],
     resolve: {
@@ -34,7 +38,7 @@ export default defineConfig(({ mode }) => {
     //   • single-file сборка → пути не нужны, всё инлайнится
     base: process.env.VITE_BASE || (singleFile ? './' : '/'),
     define: {
-      'import.meta.env.VITE_HASH_ROUTER': JSON.stringify(singleFile ? '1' : '0'),
+      'import.meta.env.VITE_HASH_ROUTER': JSON.stringify(hashRouter ? '1' : '0'),
     },
     build: {
       // Для single-file инлайним вообще все ассеты, включая 9,5 МБ видео
