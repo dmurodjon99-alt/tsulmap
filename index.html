@@ -17,7 +17,86 @@
     />
   </head>
   <body>
-    <div id="root"></div>
+    <!-- Заглушка живёт до монтирования React и служит индикатором загрузки.
+         Если приложение не стартовало, вместо пустого экрана остаётся
+         понятное сообщение с кнопкой перезагрузки. -->
+    <div id="root">
+      <div id="boot-fallback" style="
+        position: fixed; inset: 0; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; gap: 18px; padding: 24px;
+        font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+        color: #C6DCF8; text-align: center;">
+        <div style="
+          width: 42px; height: 42px; border-radius: 50%;
+          border: 3px solid rgba(255,255,255,0.18); border-top-color: #E0BE4C;
+          animation: boot-spin 0.9s linear infinite;"></div>
+        <p id="boot-text" style="margin: 0; font-size: 15px; opacity: 0.75;">Загрузка…</p>
+        <button id="boot-reload" type="button" hidden style="
+          border: 1px solid rgba(255,255,255,0.25); background: rgba(255,255,255,0.1);
+          color: #fff; border-radius: 12px; padding: 10px 20px; font-size: 15px;
+          cursor: pointer;">Обновить страницу</button>
+      </div>
+      <style>
+        @keyframes boot-spin { to { transform: rotate(360deg); } }
+      </style>
+    </div>
+
+    <script>
+      /**
+       * Самовосстановление после устаревшего кеша.
+       *
+       * GitHub Pages отдаёт HTML с max-age=600, а имена бандлов содержат хеш
+       * содержимого. Если у пользователя осталась старая копия страницы, она
+       * запрашивает уже удалённый скрипт: React не стартует и остаётся пустой
+       * экран. На мобильных жёсткой перезагрузки нет, поэтому страница
+       * перезагружает себя сама — один раз за сессию, с обходом кеша.
+       */
+      (function () {
+        var RELOAD_FLAG = 'tsul.cacheReload';
+
+        function bustCache() {
+          if (sessionStorage.getItem(RELOAD_FLAG)) return showManualReload();
+          sessionStorage.setItem(RELOAD_FLAG, '1');
+          location.replace(location.pathname + '?v=' + Date.now() + location.hash);
+        }
+
+        function showManualReload() {
+          var text = document.getElementById('boot-text');
+          var btn = document.getElementById('boot-reload');
+          if (!text || !btn) return;
+          text.textContent = 'Не удалось загрузить приложение. Обновите страницу.';
+          btn.hidden = false;
+          btn.onclick = function () {
+            sessionStorage.removeItem(RELOAD_FLAG);
+            location.replace(location.pathname + '?v=' + Date.now() + location.hash);
+          };
+        }
+
+        // Скрипт бандла не загрузился — почти наверняка устаревший кеш
+        window.addEventListener(
+          'error',
+          function (e) {
+            if (e.target && e.target.tagName === 'SCRIPT') bustCache();
+          },
+          true
+        );
+
+        // Страховка: бандл загрузился, но приложение так и не смонтировалось
+        setTimeout(function () {
+          if (document.getElementById('boot-fallback')) bustCache();
+        }, 8000);
+
+        // Успешный старт снимает флаг, чтобы механизм работал и в будущем
+        window.addEventListener('load', function () {
+          setTimeout(function () {
+            if (!document.getElementById('boot-fallback')) {
+              sessionStorage.removeItem(RELOAD_FLAG);
+            }
+          }, 1000);
+        });
+      })();
+    </script>
+
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
