@@ -28,7 +28,11 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  useEffect(() => setMenuOpen(false), [location.pathname]);
+  // Тело в скобках намеренно: стрелка без блока вернула бы значение, а React
+  // принял бы его за функцию очистки (см. ScrollToTop в Layout.jsx).
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
 
   return (
     <header className="sticky top-0 z-40 px-3 pt-3 md:px-6 md:pt-4">

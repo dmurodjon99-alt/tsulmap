@@ -4,10 +4,26 @@ import { useTranslation } from 'react-i18next';
 import Header from './Header.jsx';
 import { STATS } from '../../data/index.js';
 
-/** Прокрутка страницы наверх при смене маршрута. */
+/**
+ * Прокрутка страницы наверх при смене маршрута.
+ *
+ * Тело эффекта обязательно в фигурных скобках: со стрелкой без блока эффект
+ * возвращал бы результат window.scrollTo(), а React считает любое ненулевое
+ * возвращённое значение функцией очистки и вызывает его при следующем
+ * переходе. В обычном Chrome scrollTo возвращает undefined и всё работает, но
+ * встроенные браузеры (например, в Telegram) подменяют метод и возвращают
+ * значение — и приложение падало с «t is not a function», оставляя белый экран.
+ *
+ * scrollTo(0, 0) вместо объекта с behavior: 'instant' — эта форма понятна
+ * любому движку, а значение 'instant' в старых браузерах бросает TypeError.
+ */
 function ScrollToTop() {
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo({ top: 0, behavior: 'instant' }), [pathname]);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
   return null;
 }
 
